@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMRANG - Train Driver Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-color: #4CAF50;
+            --accent-color: #8BC34A;
+            --danger-color: #F44336;
+            --warning-color: #FF9800;
+            --info-color: #2196F3;
+            --dark-color: #263238;
+            --light-color: #ECEFF1;
+            --text-dark: #212121;
+            --text-light: #757575;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .language-toggle {
+            display: flex;
+            align-items: center;
+        }
+
+        .language-btn {
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .language-btn:hover {
+            background-color: var(--light-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Panel - Emergency Controls */
+        .left-panel {
+            width: 250px;
+            background-color: var(--dark-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .emergency-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .emergency-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .control-btn {
+            background-color: #37474F;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 90px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .control-btn i {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .control-btn.sos {
+            background-color: var(--danger-color);
+            grid-column: span 2;
+        }
+
+        .control-btn.emergency {
+            background-color: var(--warning-color);
+        }
+
+        .control-btn.aggression {
+            background-color: var(--warning-color);
+        }
+
+        .control-btn.create-ticket {
+            background-color: var(--info-color);
+        }
+
+        .control-btn.notice {
+            background-color: var(--accent-color);
+        }
+
+        .control-btn.token {
+            background-color: var(--secondary-color);
+        }
+
+        .control-btn.delay {
+            background-color: var(--info-color);
+        }
+
+        .control-btn.stop {
+            background-color: var(--danger-color);
+        }
+
+        .control-btn.safe {
+            background-color: var(--secondary-color);
+        }
+
+        .status-indicator {
+            text-align: center;
+            padding: 15px;
+            background-color: #37474F;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .status-title {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .speed-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .speed-label {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Center Panel - Map and Video */
+        .center-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .map-container {
+            flex: 1;
+            background-color: #ECEFF1;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .map {
+            width: 100%;
+            height: 100%;
+            background-image: url('https://maps.googleapis.com/maps/api/staticmap?center=13.7563,100.5018&zoom=12&size=800x400&maptype=roadmap&markers=color:red%7C13.7563,100.5018&key=YOUR_API_KEY');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        .map-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .map-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .video-container {
+            display: flex;
+            gap: 10px;
+            height: 200px;
+        }
+
+        .video-box {
+            flex: 1;
+            background-color: #263238;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .video-box.active {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+        }
+
+        .video-label {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* Right Panel - Information */
+        .right-panel {
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .schedule-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .schedule-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .rest-station {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .rest-station:hover {
+            background-color: #f5f5f5;
+        }
+
+        .station-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .station-info {
+            flex: 1;
+        }
+
+        .station-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .station-distance {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Engineer Ticket Modal */
+        .engineer-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .engineer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+
+        .engineer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .engineer-details h3 {
+            margin-bottom: 5px;
+        }
+
+        .engineer-details p {
+            margin-bottom: 3px;
+            font-size: 14px;
+        }
+
+        /* Delay Reason Modal */
+        .delay-reason {
+            margin-bottom: 15px;
+        }
+
+        .delay-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        /* Call Modal */
+        .call-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .call-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+
+        .call-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .call-name {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .call-status {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .call-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .call-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .call-btn.end {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .right-panel {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .left-panel {
+                width: 200px;
+            }
+            .right-panel {
+                width: 200px;
+            }
+        }
+
+        /* Animation for bell shake */
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - Emergency Controls -->
+        <div class="left-panel">
+            <div>
+                <div class="emergency-title" data-lang="en">EMERGENCY CONTROLS</div>
+                <div class="emergency-title" data-lang="th" style="display: none;">ควบคุมฉุกเฉิน</div>
+                
+                <div class="emergency-controls">
+                    <button class="control-btn sos" onclick="openModal('sosModal')">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span data-lang="en">SOS</span>
+                        <span data-lang="th" style="display: none;">ขอความช่วยเหลือ</span>
+                    </button>
+                    
+                    <button class="control-btn emergency" onclick="openModal('emergencyModal')">
+                        <i class="fas fa-ambulance"></i>
+                        <span data-lang="en">EMERGENCY</span>
+                        <span data-lang="th" style="display: none;">เหตุฉุกเฉิน</span>
+                    </button>
+                    
+                    <button class="control-btn aggression" onclick="openModal('aggressionModal')">
+                        <i class="fas fa-bell"></i>
+                        <span data-lang="en">AGGRESSION</span>
+                        <span data-lang="th" style="display: none;">การรุกราน</span>
+                    </button>
+                    
+                    <button class="control-btn create-ticket" onclick="openModal('ticketModal')">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span data-lang="en">CREATE TICKET</span>
+                        <span data-lang="th" style="display: none;">สร้างตั๋ว</span>
+                    </button>
+                    
+                    <button class="control-btn notice" onclick="openModal('noticeModal')">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span data-lang="en">NOTICE</span>
+                        <span data-lang="th" style="display: none;">ประกาศ</span>
+                    </button>
+                    
+                    <button class="control-btn token" onclick="openModal('tokenModal')">
+                        <i class="fas fa-bookmark"></i>
+                        <span data-lang="en">TOKEN</span>
+                        <span data-lang="th" style="display: none;">โทเค็น</span>
+                    </button>
+                    
+                    <button class="control-btn delay" onclick="openModal('delayModal')">
+                        <i class="fas fa-clock"></i>
+                        <span data-lang="en">DELAY</span>
+                        <span data-lang="th" style="display: none;">ความล่าช้า</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="status-indicator">
+                <div class="status-title" data-lang="en">STATUS</div>
+                <div class="status-title" data-lang="th" style="display: none;">สถานะ</div>
+                
+                <div class="speed-display" id="speedValue">78</div>
+                <div class="speed-label" data-lang="en">km/h</div>
+                <div class="speed-label" data-lang="th" style="display: none;">กม./ชม.</div>
+                
+                <div style="margin-top: 15px;">
+                    <button class="control-btn stop" id="stopBtn" style="display: none;">
+                        <i class="fas fa-stop-circle"></i>
+                        <span data-lang="en">STOP</span>
+                        <span data-lang="th" style="display: none;">หยุด</span>
+                    </button>
+                    <button class="control-btn safe" id="safeBtn">
+                        <i class="fas fa-check-circle"></i>
+                        <span data-lang="en">SAFE</span>
+                        <span data-lang="th" style="display: none;">ปลอดภัย</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Center Panel - Map and Video -->
+        <div class="center-panel">
+            <div class="map-controls">
+                <div>
+                    <button class="map-btn" data-lang="en" onclick="switchMapView('full')">Full Route</button>
+                    <button class="map-btn" data-lang="th" style="display: none;" onclick="switchMapView('full')">เส้นทางเต็ม</button>
+                    
+                    <button class="map-btn" data-lang="en" onclick="switchMapView('current')">Current</button>
+                    <button class="map-btn" data-lang="th" style="display: none;" onclick="switchMapView('current')">ปัจจุบัน</button>
+                </div>
+                <div>
+                    <button class="map-btn" data-lang="en" onclick="showRestStations()">Rest Stations</button>
+                    <button class="map-btn" data-lang="th" style="display: none;" onclick="showRestStations()">สถานีพัก</button>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <div class="map" id="trainMap"></div>
+                <div class="map-overlay" data-lang="en">Long press for options</div>
+                <div class="map-overlay" data-lang="th" style="display: none;">กดค้างสำหรับตัวเลือก</div>
+            </div>
+            
+            <div class="video-container">
+                <div class="video-box" id="frontVideo" onclick="toggleVideoSize('frontVideo')">
+                    <div class="video-label" data-lang="en">Front Camera</div>
+                    <div class="video-label" data-lang="th" style="display: none;">กล้องหน้า</div>
+                    <!-- Video placeholder -->
+                    <div style="width:100%;height:100%;background-color:#000;display:flex;align-items:center;justify-content:center;color:white;">
+                        <i class="fas fa-video" style="font-size:30px;"></i>
+                    </div>
+                </div>
+                <div class="video-box" id="rearVideo" onclick="toggleVideoSize('rearVideo')">
+                    <div class="video-label" data-lang="en">Rear Camera</div>
+                    <div class="video-label" data-lang="th" style="display: none;">กล้องหลัง</div>
+                    <!-- Video placeholder -->
+                    <div style="width:100%;height:100%;background-color:#000;display:flex;align-items:center;justify-content:center;color:white;">
+                        <i class="fas fa-video" style="font-size:30px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel - Information -->
+        <div class="right-panel">
+            <div class="info-section">
+                <div class="info-title" data-lang="en">My Route</div>
+                <div class="info-title" data-lang="th" style="display: none;">เส้นทางของฉัน</div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">Start Location</div>
+                    <div class="info-label" data-lang="th" style="display: none;">สถานีต้นทาง</div>
+                    <div class="info-value">Thon Buri</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">End Location</div>
+                    <div class="info-label" data-lang="th" style="display: none;">สถานีปลายทาง</div>
+                    <div class="info-value">Hua Hin</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">Distance</div>
+                    <div class="info-label" data-lang="th" style="display: none;">ระยะทาง</div>
+                    <div class="info-value">32 km</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">Est. Arrival</div>
+                    <div class="info-label" data-lang="th" style="display: none;">ถึงโดยประมาณ</div>
+                    <div class="info-value">4:15 PM</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-title" data-lang="en">Next Shift</div>
+                <div class="info-title" data-lang="th" style="display: none;">กะงานถัดไป</div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">Time</div>
+                    <div class="info-label" data-lang="th" style="display: none;">เวลา</div>
+                    <div class="info-value">Today, 9:00 AM – 5:00 PM</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label" data-lang="en">Train #</div>
+                    <div class="info-label" data-lang="th" style="display: none;">รถไฟหมายเลข</div>
+                    <div class="info-value">A78</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-title" data-lang="en">Alerts</div>
+                <div class="info-title" data-lang="th" style="display: none;">การแจ้งเตือน</div>
+                
+                <div class="info-item">
+                    <div class="info-value" style="color: var(--warning-color);">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <span data-lang="en">Tracks closed ahead. Expect delays.</span>
+                        <span data-lang="th" style="display: none;">รางปิดข้างหน้า คาดว่าจะล่าช้า</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-title" data-lang="en">Rest Stations</div>
+                <div class="info-title" data-lang="th" style="display: none;">สถานีพัก</div>
+                
+                <div class="rest-station" onclick="openModal('stationModal1')">
+                    <div class="station-icon">1</div>
+                    <div class="station-info">
+                        <div class="station-name">Siriraj</div>
+                        <div class="station-distance" data-lang="en">5 km ahead</div>
+                        <div class="station-distance" data-lang="th" style="display: none;">ข้างหน้า 5 กม.</div>
+                    </div>
+                </div>
+                
+                <div class="rest-station" onclick="openModal('stationModal2')">
+                    <div class="station-icon">2</div>
+                    <div class="station-info">
+                        <div class="station-name">Community</div>
+                        <div class="station-distance" data-lang="en">15 km ahead</div>
+                        <div class="station-distance" data-lang="th" style="display: none;">ข้างหน้า 15 กม.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SOS Modal -->
+    <div class="modal" id="sosModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('sosModal')">&times;</span>
+            <div class="modal-title" data-lang="en">SOS Emergency</div>
+            <div class="modal-title" data-lang="th" style="display: none;">เหตุฉุกเฉิน SOS</div>
+            
+            <div class="modal-body">
+                <div class="call-container">
+                    <div class="call-avatar">
+                        <img src="https://www.si.mahidol.ac.th/th/wp-content/uploads/2019/01/siriraj-logo.png" alt="Siriraj Hospital">
+                    </div>
+                    <div class="call-name">Siriraj Hospital</div>
+                    <div class="call-status" data-lang="en">Calling emergency services...</div>
+                    <div class="call-status" data-lang="th" style="display: none;">กำลังโทรเรียกบริการฉุกเฉิน...</div>
+                    
+                    <div style="margin-top: 30px; font-size: 18px; color: var(--danger-color);">
+                        <i class="fas fa-check-circle"></i>
+                        <span data-lang="en">SOS has been called for you</span>
+                        <span data-lang="th" style="display: none;">ได้เรียก SOS สำหรับคุณแล้ว</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('sosModal')" data-lang="en">OK</button>
+                <button class="modal-btn primary" onclick="closeModal('sosModal')" data-lang="th" style="display: none;">ตกลง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Emergency Modal -->
+    <div class="modal" id="emergencyModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('emergencyModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Emergency Assistance</div>
+            <div class="modal-title" data-lang="th" style="display: none;">ความช่วยเหลือฉุกเฉิน</div>
+            
+            <div class="modal-body">
+                <div class="call-container">
+                    <div class="call-avatar">
+                        <img src="https://www.si.mahidol.ac.th/th/wp-content/uploads/2019/01/siriraj-logo.png" alt="Siriraj Hospital">
+                    </div>
+                    <div class="call-name">Siriraj Hospital</div>
+                    <div class="call-status" data-lang="en">Connecting to emergency line...</div>
+                    <div class="call-status" data-lang="th" style="display: none;">กำลังเชื่อมต่อสายฉุกเฉิน...</div>
+                    
+                    <div style="margin-top: 30px; font-size: 18px; color: var(--danger-color);">
+                        <i class="fas fa-check-circle"></i>
+                        <span data-lang="en">Emergency help has been called for you</span>
+                        <span data-lang="th" style="display: none;">ได้เรียกความช่วยเหลือฉุกเฉินสำหรับคุณแล้ว</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('emergencyModal')" data-lang="en">OK</button>
+                <button class="modal-btn primary" onclick="closeModal('emergencyModal')" data-lang="th" style="display: none;">ตกลง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Aggression Modal -->
+    <div class="modal" id="aggressionModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('aggressionModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Aggression Alert</div>
+            <div class="modal-title" data-lang="th" style="display: none;">การแจ้งเตือนการรุกราน</div>
+            
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-bell shake" style="font-size: 50px; color: var(--warning-color);"></i>
+                </div>
+                
+                <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; color: var(--warning-color);">
+                    <span data-lang="en">WARNING: DO NOT PROCEED AHEAD</span>
+                    <span data-lang="th" style="display: none;">คำเตือน: ห้ามดำเนินการต่อไปข้างหน้า</span>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; font-size: 16px; color: var(--info-color);">
+                    <i class="fas fa-check-circle"></i>
+                    <span data-lang="en">Delay notification has been sent</span>
+                    <span data-lang="th" style="display: none;">ได้ส่งการแจ้งเตือนความล่าช้าแล้ว</span>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('aggressionModal')" data-lang="en">OK</button>
+                <button class="modal-btn primary" onclick="closeModal('aggressionModal')" data-lang="th" style="display: none;">ตกลง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Ticket Modal -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('ticketModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Create Maintenance Ticket</div>
+            <div class="modal-title" data-lang="th" style="display: none;">สร้างตั๋วซ่อมบำรุง</div>
+            
+            <div class="modal-body">
+                <div class="engineer-info">
+                    <div class="engineer-avatar">
+                        <img src="https://img.freepik.com/free-vector/handyman-concept-illustration_114360-8214.jpg" alt="Engineer">
+                    </div>
+                    <div class="engineer-details">
+                        <h3 data-lang="en">Engineer assigned</h3>
+                        <h3 data-lang="th" style="display: none;">วิศวกรที่ได้รับมอบหมาย</h3>
+                        <p data-lang="en">Your engineer is: <strong>Somchai Techavanich</strong></p>
+                        <p data-lang="th" style="display: none;">วิศวกรของคุณคือ: <strong>สมชาย เทคโนโลยี</strong></p>
+                        <p data-lang="en">Phone: <strong>+66-81-234-5678</strong></p>
+                        <p data-lang="th" style="display: none;">โทรศัพท์: <strong>+66-81-234-5678</strong></p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <p data-lang="en"><i class="fas fa-check-circle" style="color: var(--info-color);"></i> Engineer has been called for you</p>
+                    <p data-lang="th" style="display: none;"><i class="fas fa-check-circle" style="color: var(--info-color);"></i> ได้เรียกวิศวกรสำหรับคุณแล้ว</p>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <div class="info-label" data-lang="en">Issue Type</div>
+                    <div class="info-label" data-lang="th" style="display: none;">ประเภทปัญหา</div>
+                    <select class="delay-select">
+                        <option data-lang="en">Equipment malfunction</option>
+                        <option data-lang="th" style="display: none;">อุปกรณ์ขัดข้อง</option>
+                        <option data-lang="en">Track issue</option>
+                        <option data-lang="th" style="display: none;">ปัญหารางรถไฟ</option>
+                        <option data-lang="en">Electrical problem</option>
+                        <option data-lang="th" style="display: none;">ปัญหาไฟฟ้า</option>
+                    </select>
+                    
+                    <div class="info-label" data-lang="en">Description</div>
+                    <div class="info-label" data-lang="th" style="display: none;">คำอธิบาย</div>
+                    <textarea class="delay-select" rows="3" placeholder="Describe the issue..." data-lang-placeholder-en="Describe the issue..." data-lang-placeholder-th="อธิบายปัญหา..."></textarea>
+                    
+                    <div class="info-label" data-lang="en">Location</div>
+                    <div class="info-label" data-lang="th" style="display: none;">สถานที่</div>
+                    <input type="text" class="delay-select" placeholder="Enter location..." data-lang-placeholder-en="Enter location..." data-lang-placeholder-th="ป้อนสถานที่...">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('ticketModal')" data-lang="en">Submit Request</button>
+                <button class="modal-btn primary" onclick="closeModal('ticketModal')" data-lang="th" style="display: none;">ส่งคำขอ</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notice Modal -->
+    <div class="modal" id="noticeModal">
+        <div class="modal-content" style="width: 90%; max-width: 800px;">
+            <span class="modal-close" onclick="closeModal('noticeModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Urgent Notices</div>
+            <div class="modal-title" data-lang="th" style="display: none;">ประกาศด่วน</div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
+                        <h3 data-lang="en">Current Alerts</h3>
+                        <h3 data-lang="th" style="display: none;">การแจ้งเตือนปัจจุบัน</h3>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background-color: #FFF9C4; border-radius: 5px;">
+                            <p data-lang="en"><strong>Tracks closed ahead.</strong> Expect delays of approximately 20 minutes.</p>
+                            <p data-lang="th" style="display: none;"><strong>รางปิดข้างหน้า</strong> คาดว่าจะล่าช้าประมาณ 20 นาที</p>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background-color: #FFCCBC; border-radius: 5px;">
+                            <p data-lang="en"><strong>Maintenance work</strong> between Thon Buri and Bang Sue stations.</p>
+                            <p data-lang="th" style="display: none;"><strong>งานซ่อมบำรุง</strong> ระหว่างสถานีธนบุรีและบางซื่อ</p>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <h3 data-lang="en">Dispatcher Messages</h3>
+                        <h3 data-lang="th" style="display: none;">ข้อความจากผู้ควบคุม</h3>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background-color: #E1F5FE; border-radius: 5px;">
+                            <p data-lang="en"><strong>Real-time update:</strong> Alternate route available via Platform 3.</p>
+                            <p data-lang="th" style="display: none;"><strong>อัปเดตแบบเรียลไทม์:</strong> เส้นทางอื่นสามารถใช้ได้ผ่านชานชาลา 3</p>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <div class="info-label" data-lang="en">Message Dispatcher</div>
+                            <div class="info-label" data-lang="th" style="display: none;">ส่งข้อความถึงผู้ควบคุม</div>
+                            <textarea class="delay-select" rows="3" placeholder="Type your message..." data-lang-placeholder-en="Type your message..." data-lang-placeholder-th="พิมพ์ข้อความของคุณ..."></textarea>
+                            <button class="modal-btn primary" style="margin-top: 10px;" data-lang="en">Send</button>
+                            <button class="modal-btn primary" style="margin-top: 10px; display: none;" data-lang="th">ส่ง</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('noticeModal')" data-lang="en">Close</button>
+                <button class="modal-btn primary" onclick="closeModal('noticeModal')" data-lang="th" style="display: none;">ปิด</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Token Modal -->
+    <div class="modal" id="tokenModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('tokenModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Token Confirmation</div>
+            <div class="modal-title" data-lang="th" style="display: none;">การยืนยันโทเค็น</div>
+            
+            <div class="modal-body" style="text-align: center;">
+                <div style="font-size: 50px; color: var(--secondary-color); margin-bottom: 20px;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div style="font-size: 18px;">
+                    <span data-lang="en">Marked successfully. Thank you!</span>
+                    <span data-lang="th" style="display: none;">ทำเครื่องหมายเรียบร้อยแล้ว ขอบคุณ!</span>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('tokenModal')" data-lang="en">OK</button>
+                <button class="modal-btn primary" onclick="closeModal('tokenModal')" data-lang="th" style="display: none;">ตกลง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delay Modal -->
+    <div class="modal" id="delayModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('delayModal')">&times;</span>
+            <div class="modal-title" data-lang="en">Delay Report</div>
+            <div class="modal-title" data-lang="th" style="display: none;">รายงานความล่าช้า</div>
+            
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <p data-lang="en"><i class="fas fa-check-circle" style="color: var(--info-color);"></i> Delay has been marked. Please submit the reason.</p>
+                    <p data-lang="th" style="display: none;"><i class="fas fa-check-circle" style="color: var(--info-color);"></i> ได้ทำเครื่องหมายความล่าช้าแล้ว กรุณาส่งเหตุผล</p>
+                </div>
+                
+                <div class="delay-reason">
+                    <div class="info-label" data-lang="en">Reason for Delay</div>
+                    <div class="info-label" data-lang="th" style="display: none;">เหตุผลความล่าช้า</div>
+                    <select class="delay-select" id="delayReason">
+                        <option value="" data-lang="en">Select a reason...</option>
+                        <option value="" data-lang="th" style="display: none;">เลือกเหตุผล...</option>
+                        <option data-lang="en">Personal issue needs immediate resolution</option>
+                        <option data-lang="th" style="display: none;">ปัญหาส่วนตัวที่ต้องแก้ไขทันที</option>
+                        <option data-lang="en">Person/animal on tracks</option>
+                        <option data-lang="th" style="display: none;">มีคน/สัตว์บนราง</option>
+                        <option data-lang="en">Train malfunction</option>
+                        <option data-lang="th" style="display: none;">รถไฟขัดข้อง</option>
+                        <option data-lang="en">Train crew requires medical assistance</option>
+                        <option data-lang="th" style="display: none;">เจ้าหน้าที่รถไฟต้องการความช่วยเหลือทางการแพทย์</option>
+                        <option data-lang="en">Other</option>
+                        <option data-lang="th" style="display: none;">อื่นๆ</option>
+                    </select>
+                </div>
+                
+                <div class="delay-reason" id="otherReasonContainer" style="display: none;">
+                    <div class="info-label" data-lang="en">Please specify</div>
+                    <div class="info-label" data-lang="th" style="display: none;">กรุณาระบุ</div>
+                    <textarea class="delay-select" rows="3" placeholder="Enter details..." data-lang-placeholder-en="Enter details..." data-lang-placeholder-th="ป้อนรายละเอียด..."></textarea>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('delayModal')" data-lang="en">Submit</button>
+                <button class="modal-btn primary" onclick="closeModal('delayModal')" data-lang="th" style="display: none;">ส่ง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rest Station Modal 1 -->
+    <div class="modal" id="stationModal1">
+        <div class="modal-content" style="width: 90%; max-width: 800px;">
+            <span class="modal-close" onclick="closeModal('stationModal1')">&times;</span>
+            <div class="modal-title">Siriraj Rest Station</div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <img src="https://www.si.mahidol.ac.th/th/wp-content/uploads/2019/01/siriraj-logo.png" alt="Siriraj" style="width: 100%; max-height: 200px; object-fit: contain;">
+                    </div>
+                    <div style="flex: 2;">
+                        <h3>Siriraj Hospital Rest Area</h3>
+                        <p style="margin-top: 10px;" data-lang="en">Facilities available:</p>
+                        <p style="margin-top: 10px;" data-lang="th" style="display: none;">สิ่งอำนวยความสะดวกที่มี:</p>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+                            <div style="background-color: #E3F2FD; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-bed"></i> 
+                                <span data-lang="en">Rest Area</span>
+                                <span data-lang="th" style="display: none;">พื้นที่พักผ่อน</span>
+                            </div>
+                            <div style="background-color: #E8F5E9; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-utensils"></i> 
+                                <span data-lang="en">Cafeteria</span>
+                                <span data-lang="th" style="display: none;">โรงอาหาร</span>
+                            </div>
+                            <div style="background-color: #FFF3E0; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-shower"></i> 
+                                <span data-lang="en">Shower</span>
+                                <span data-lang="th" style="display: none;">ห้องอาบน้ำ</span>
+                            </div>
+                            <div style="background-color: #F3E5F5; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-wifi"></i> 
+                                <span data-lang="en">Wi-Fi</span>
+                                <span data-lang="th" style="display: none;">ไวไฟ</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <div class="info-label" data-lang="en">Current Occupancy</div>
+                            <div class="info-label" data-lang="th" style="display: none;">ผู้ใช้บริการปัจจุบัน</div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 100px; height: 10px; background-color: #E0E0E0; border-radius: 5px;">
+                                    <div style="width: 30%; height: 100%; background-color: var(--secondary-color); border-radius: 5px;"></div>
+                                </div>
+                                <span>30%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3 data-lang="en">Emergency Contacts</h3>
+                    <h3 data-lang="th" style="display: none;">ติดต่อฉุกเฉิน</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div style="background-color: #F5F5F5; padding: 10px; border-radius: 5px;">
+                            <div style="font-weight: 500;" data-lang="en">Air Conditioner Technician</div>
+                            <div style="font-weight: 500;" data-lang="th" style="display: none;">ช่างเครื่องปรับอากาศ</div>
+                            <div style="font-size: 14px; color: var(--text-light);">+66-81-234-5678</div>
+                        </div>
+                        <div style="background-color: #F5F5F5; padding: 10px; border-radius: 5px;">
+                            <div style="font-weight: 500;" data-lang="en">Electrician</div>
+                            <div style="font-weight: 500;" data-lang="th" style="display: none;">ช่างไฟฟ้า</div>
+                            <div style="font-size: 14px; color: var(--text-light);">+66-82-345-6789</div>
+                        </div>
+                        <div style="background-color: #F5F5F5; padding: 10px; border-radius: 5px;">
+                            <div style="font-weight: 500;" data-lang="en">Plumber</div>
+                            <div style="font-weight: 500;" data-lang="th" style="display: none;">ช่างประปา</div>
+                            <div style="font-size: 14px; color: var(--text-light);">+66-83-456-7890</div>
+                        </div>
+                        <div style="background-color: #F5F5F5; padding: 10px; border-radius: 5px;">
+                            <div style="font-weight: 500;" data-lang="en">Cleaner</div>
+                            <div style="font-weight: 500;" data-lang="th" style="display: none;">พนักงานทำความสะอาด</div>
+                            <div style="font-size: 14px; color: var(--text-light);">+66-84-567-8901</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('stationModal1')" data-lang="en">Close</button>
+                <button class="modal-btn primary" onclick="closeModal('stationModal1')" data-lang="th" style="display: none;">ปิด</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rest Station Modal 2 -->
+    <div class="modal" id="stationModal2">
+        <div class="modal-content" style="width: 90%; max-width: 800px;">
+            <span class="modal-close" onclick="closeModal('stationModal2')">&times;</span>
+            <div class="modal-title">Community Rest Station</div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <img src="https://via.placeholder.com/300x200?text=Community+Rest+Station" alt="Community" style="width: 100%; max-height: 200px; object-fit: cover;">
+                    </div>
+                    <div style="flex: 2;">
+                        <h3>Community Rest Area</h3>
+                        <p style="margin-top: 10px;" data-lang="en">Facilities available:</p>
+                        <p style="margin-top: 10px;" data-lang="th" style="display: none;">สิ่งอำนวยความสะดวกที่มี:</p>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+                            <div style="background-color: #E3F2FD; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-bed"></i> 
+                                <span data-lang="en">Rest Area</span>
+                                <span data-lang="th" style="display: none;">พื้นที่พักผ่อน</span>
+                            </div>
+                            <div style="background-color: #E8F5E9; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                                <i class="fas fa-coffee"></i> 
+                                <span data-lang="en">Coffee Shop</span>
+                                <span data-lang="th" style="display: none;">ร้านกาแฟ</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <div class="info-label" data-lang="en">Current Occupancy</div>
+                            <div class="info-label" data-lang="th" style="display: none;">ผู้ใช้บริการปัจจุบัน</div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 100px; height: 10px; background-color: #E0E0E0; border-radius: 5px;">
+                                    <div style="width: 60%; height: 100%; background-color: var(--warning-color); border-radius: 5px;"></div>
+                                </div>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3 data-lang="en">Coupons & Deals</h3>
+                    <h3 data-lang="th" style="display: none;">คูปองและข้อเสนอ</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div style="background-color: #FFF8E1; padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-weight: 500; color: var(--warning-color);">7-Eleven</div>
+                            <div style="font-size: 14px;" data-lang="en">20% OFF</div>
+                            <div style="font-size: 14px;" data-lang="th" style="display: none;">ลด 20%</div>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--warning-color); color: white; border: none; border-radius: 3px; font-size: 12px;" data-lang="en">Claim</button>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--warning-color); color: white; border: none; border-radius: 3px; font-size: 12px; display: none;" data-lang="th">รับ</button>
+                        </div>
+                        <div style="background-color: #F1F8E9; padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-weight: 500; color: var(--secondary-color);">Hotpot</div>
+                            <div style="font-size: 14px;" data-lang="en">30% Deals</div>
+                            <div style="font-size: 14px;" data-lang="th" style="display: none;">ลด 30%</div>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--secondary-color); color: white; border: none; border-radius: 3px; font-size: 12px;" data-lang="en">Claim</button>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--secondary-color); color: white; border: none; border-radius: 3px; font-size: 12px; display: none;" data-lang="th">รับ</button>
+                        </div>
+                        <div style="background-color: #E8EAF6; padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-weight: 500; color: var(--info-color);">Supermarket</div>
+                            <div style="font-size: 14px;" data-lang="en">$5 Coupon</div>
+                            <div style="font-size: 14px;" data-lang="th" style="display: none;">คูปอง 5 ดอลลาร์</div>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--info-color); color: white; border: none; border-radius: 3px; font-size: 12px;" data-lang="en">Claim</button>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: var(--info-color); color: white; border: none; border-radius: 3px; font-size: 12px; display: none;" data-lang="th">รับ</button>
+                        </div>
+                        <div style="background-color: #FCE4EC; padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-weight: 500; color: #EC407A;">Grab</div>
+                            <div style="font-size: 14px;" data-lang="en">$2 OFF</div>
+                            <div style="font-size: 14px;" data-lang="th" style="display: none;">ลด 2 ดอลลาร์</div>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: #EC407A; color: white; border: none; border-radius: 3px; font-size: 12px;" data-lang="en">Claim</button>
+                            <button style="margin-top: 5px; padding: 3px 10px; background-color: #EC407A; color: white; border: none; border-radius: 3px; font-size: 12px; display: none;" data-lang="th">รับ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-btn primary" onclick="closeModal('stationModal2')" data-lang="en">Close</button>
+                <button class="modal-btn primary" onclick="closeModal('stationModal2')" data-lang="th" style="display: none;">ปิด</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Language toggle functionality
+        let currentLanguage = 'en';
+        
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'th' : 'en';
+            
+            // Toggle visibility of language-specific elements
+            document.querySelectorAll('[data-lang="en"]').forEach(el => {
+                el.style.display = currentLanguage === 'en' ? '' : 'none';
+            });
+            
+            document.querySelectorAll('[data-lang="th"]').forEach(el => {
+                el.style.display = currentLanguage === 'th' ? '' : 'none';
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-lang-placeholder-en]').forEach(el => {
+                el.placeholder = currentLanguage === 'en' ? el.getAttribute('data-lang-placeholder-en') : el.getAttribute('data-lang-placeholder-th');
+            });
+        }
+        
+        // Modal functionality
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            
+            // Special handling for aggression modal (bell shake)
+            if (modalId === 'aggressionModal') {
+                const bell = document.querySelector('#aggressionModal .fa-bell');
+                bell.classList.add('shake');
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Stop bell shake when closing aggression modal
+            if (modalId === 'aggressionModal') {
+                const bell = document.querySelector('#aggressionModal .fa-bell');
+                bell.classList.remove('shake');
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+                
+                // Stop bell shake if aggression modal is closed
+                if (event.target.id === 'aggressionModal') {
+                    const bell = document.querySelector('#aggressionModal .fa-bell');
+                    bell.classList.remove('shake');
+                }
+            }
+        }
+        
+        // Toggle video size
+        function toggleVideoSize(videoId) {
+            const video = document.getElementById(videoId);
+            video.classList.toggle('active');
+        }
+        
+        // Switch map view
+        function switchMapView(viewType) {
+            const map = document.getElementById('trainMap');
+            if (viewType === 'full') {
+                map.style.backgroundImage = "url('https://maps.googleapis.com/maps/api/staticmap?center=13.7563,100.5018&zoom=10&size=800x400&maptype=roadmap&markers=color:red%7C13.7563,100.5018&key=YOUR_API_KEY')";
+            } else {
+                map.style.backgroundImage = "url('https://maps.googleapis.com/maps/api/staticmap?center=13.7563,100.5018&zoom=12&size=800x400&maptype=roadmap&markers=color:red%7C13.7563,100.5018&key=YOUR_API_KEY')";
+            }
+        }
+        
+        // Show rest stations on map
+        function showRestStations() {
+            const map = document.getElementById('trainMap');
+            map.style.backgroundImage = "url('https://maps.googleapis.com/maps/api/staticmap?center=13.7563,100.5018&zoom=11&size=800x400&maptype=roadmap&markers=color:red%7C13.7563,100.5018&markers=color:blue%7C13.7322,100.5214&markers=color:blue%7C13.7890,100.5321&key=YOUR_API_KEY')";
+        }
+        
+        // Random speed fluctuation
+        function updateSpeed() {
+            const speedElement = document.getElementById('speedValue');
+            let currentSpeed = parseInt(speedElement.textContent);
+            const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+            
+            // Ensure speed stays within reasonable limits
+            currentSpeed = Math.max(70, Math.min(85, currentSpeed + change));
+            speedElement.textContent = currentSpeed;
+            
+            // Randomly trigger stop/safe buttons (for demo purposes)
+            if (Math.random() < 0.01) { // 1% chance to trigger
+                if (Math.random() < 0.5) {
+                    document.getElementById('stopBtn').style.display = '';
+                    document.getElementById('safeBtn').style.display = 'none';
+                } else {
+                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('safeBtn').style.display = '';
+                }
+            }
+        }
+        
+        // Show/hide other reason textarea based on selection
+        document.getElementById('delayReason').addEventListener('change', function() {
+            const otherContainer = document.getElementById('otherReasonContainer');
+            if (this.value === 'Other' || (currentLanguage === 'th' && this.options[this.selectedIndex].textContent === 'อื่นๆ')) {
+                otherContainer.style.display = 'block';
+            } else {
+                otherContainer.style.display = 'none';
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up language toggle
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.addEventListener('click', toggleLanguage);
+            });
+            
+            // Update speed every second
+            setInterval(updateSpeed, 1000);
+            
+            // Simulate random emergency detection
+            setInterval(() => {
+                if (Math.random() < 0.02) { // 2% chance
+                    document.getElementById('stopBtn').style.display = '';
+                    document.getElementById('safeBtn').style.display = 'none';
+                    
+                    // Auto-reset after 5-10 seconds
+                    setTimeout(() => {
+                        document.getElementById('stopBtn').style.display = 'none';
+                        document.getElementById('safeBtn').style.display = '';
+                    }, 5000 + Math.random() * 5000);
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
